@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notes-app
+  template:
+    metadata:
+      labels:
+        app: notes-app
+    spec:
+      serviceAccountName: notes-app-sa
+      containers:
+        - name: notes-app
+          image: 021370625843.dkr.ecr.us-east-1.amazonaws.com/notes-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TABLE_NAME
+              value: notes
+            - name: AWS_us-east-1
+              value: us-west-2

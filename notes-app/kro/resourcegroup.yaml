@@ -1,0 +1,78 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: notes-app
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: NotesApp
+    spec:
+      name: string
+      tableName: string | default="notes"
+      region: string | default="us-east-1"
+      image: string
+  resources:
+    - id: dynamodbTable
+      template:
+        apiVersion: dynamodb.services.k8s.aws/v1alpha1
+        kind: Table
+        metadata:
+          name: ${schema.spec.name}-table
+        spec:
+          tableName: ${schema.spec.tableName}
+          attributeDefinitions:
+            - attributeName: id
+              attributeType: S
+          keySchema:
+            - attributeName: id
+              keyType: HASH
+          billingMode: PAY_PER_REQUEST
+
+    - id: serviceAccount
+      template:
+        apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: ${schema.spec.name}-sa
+
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${schema.spec.name}
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ${schema.spec.name}
+          template:
+            metadata:
+              labels:
+                app: ${schema.spec.name}
+            spec:
+              serviceAccountName: ${schema.spec.name}-sa
+              containers:
+                - name: app
+                  image: ${schema.spec.image}
+                  ports:
+                    - containerPort: 8080
+                  env:
+                    - name: TABLE_NAME
+                      value: ${schema.spec.tableName}
+                    - name: AWS_REGION
+                      value: ${schema.spec.region}
+
+    - id: service
+      template:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: ${schema.spec.name}
+        spec:
+          type: LoadBalancer
+          selector:
+            app: ${schema.spec.name}
+          ports:
+            - port: 80
+              targetPort: 8080

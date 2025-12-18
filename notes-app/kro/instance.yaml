@@ -1,0 +1,9 @@
+apiVersion: kro.run/v1alpha1
+kind: NotesApp
+metadata:
+  name: my-notes-app
+spec:
+  name: notes-app
+  tableName: notes
+  region: us-east-1
+  image: 021370625843.dkr.ecr.us-east-1.amazonaws.com/notes-app:latest

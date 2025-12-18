@@ -1,0 +1,16 @@
+apiVersion: dynamodb.services.k8s.aws/v1alpha1
+kind: Table
+metadata:
+  name: notes-table
+spec:
+  tableName: notes
+  attributeDefinitions:
+    - attributeName: id
+      attributeType: S
+  keySchema:
+    - attributeName: id
+      keyType: HASH
+  billingMode: PAY_PER_REQUEST
+  tags:
+    - key: app
+      value: notes-app

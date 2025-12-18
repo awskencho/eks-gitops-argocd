@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notes App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .note { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .note h3 { margin: 0 0 10px 0; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px 0; }
+        button:hover { background: #0056b3; }
+        .delete-btn { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>📝 Notes App</h1>
+    <div id="form">
+        <input type="text" id="title" placeholder="Title">
+        <textarea id="content" rows="3" placeholder="Content"></textarea>
+        <button onclick="createNote()">Add Note</button>
+    </div>
+    <div id="notes"></div>
+    <script>
+        async function loadNotes() {
+            const res = await fetch('/api/notes');
+            const notes = await res.json();
+            document.getElementById('notes').innerHTML = notes.map(n => `
+                <div class="note">
+                    <h3>${n.title}</h3>
+                    <p>${n.content}</p>
+                    <button class="delete-btn" onclick="deleteNote('${n.id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+        async function createNote() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            await fetch('/api/notes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, content})
+            });
+            document.getElementById('title').value = '';
+            document.getElementById('content').value = '';
+            loadNotes();
+        }
+        async function deleteNote(id) {
+            await fetch(`/api/notes/${id}`, {method: 'DELETE'});
+            loadNotes();
+        }
+        loadNotes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+apiVersion: iam.services.k8s.aws/v1alpha1
+kind: Role
+metadata:
+  name: notes-app-role
+spec:
+  name: notes-app-role
+  assumeRolePolicyDocument: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Federated": "arn:aws:iam::021370625843:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EF03EBB6FA8FD4A0B8017A6DD3B0B01B"
+          },
+          "Action": "sts:AssumeRoleWithWebIdentity",
+          "Condition": {
+            "StringEquals": {
+              "oidc.eks.us-east-1.amazonaws.com/id/EF03EBB6FA8FD4A0B8017A6DD3B0B01B:sub": "system:serviceaccount:default:notes-app-sa"
+            }
+          }
+        }
+      ]
+    }
+  policies:
+    - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
